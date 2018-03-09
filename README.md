@@ -1,3 +1,27 @@
+# DEV BRANCH: `headless`
+adds "headless fingerprint authentification" to the plugin, i.e. activates the fingerprint sensor without displaying a dialog.
+
+Use this the headless-mode by adding the options `{headless: true}` when invoking `decrypt()`.
+
+There is an additional method `cancle()` on the plugin for stopping/canceling the headless fingerprint authentification (i.e. deactivate/stop listening to the fingerprint sensor).
+The success-callback is invoked with a result object `{canceled: true}`, if the authentification was stopped (`false` if the authentification was not active).
+
+```javascript
+var decryptConfig = {
+    clientId: "myAppName",
+    username: "currentUser",
+    token: "base64encodedUserCredentials",
+    headless: true
+};
+
+FingerprintAuth.decrypt(decryptConfig, successCallback, errorCallback);
+
+//...
+
+FingerprintAuth.cancel(function(result){ console.log('canceled? ', result.canceled); }, function(error){ console.error('error: '+error); });
+
+```
+
 # Update to Version 1.4.0
 Please consult the [changelog](https://github.com/mjwheatley/cordova-plugin-android-fingerprint-auth/blob/master/changelog.md).
 
