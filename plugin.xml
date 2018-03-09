@@ -28,6 +28,8 @@
         <source-file src="src/android/FingerprintAuth.java" target-dir="src/com/cordova/plugin/android/fingerprintauth" />
         <source-file src="src/android/FingerprintAuthenticationDialogFragment.java" target-dir="src/com/cordova/plugin/android/fingerprintauth" />
         <source-file src="src/android/FingerprintUiHelper.java" target-dir="src/com/cordova/plugin/android/fingerprintauth" />
+        <source-file src="src/android/FingerprintAuthenticationHeadless.java" target-dir="src/com/cordova/plugin/android/fingerprintauth" />
+        <source-file src="src/android/FingerprintHeadlessHelper.java" target-dir="src/com/cordova/plugin/android/fingerprintauth" />
         <resource-file src="res/android/drawable/ic_fingerprint_error.xml" target="res/drawable/ic_fingerprint_error.xml" />
         <resource-file src="res/android/drawable/ic_fingerprint_success.xml" target="res/drawable/ic_fingerprint_success.xml" />
         <resource-file src="res/android/drawable-hdpi/ic_fp_40px.png" target="res/drawable-hdpi/ic_fp_40px.png" />

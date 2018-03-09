@@ -67,5 +67,15 @@ FingerprintAuth.prototype.isAvailable = function (successCallback, errorCallback
     );
 };
 
+FingerprintAuth.prototype.cancel = function (successCallback, errorCallback) {
+    cordova.exec(
+        successCallback,
+        errorCallback,
+        "FingerprintAuth",  // Java Class
+        "cancel", // action
+        [{}]
+    );
+};
+
 FingerprintAuth = new FingerprintAuth();
 module.exports = FingerprintAuth;
