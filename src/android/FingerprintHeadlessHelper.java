@@ -20,8 +20,6 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.CancellationSignal;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 
 /**
@@ -35,8 +33,6 @@ public class FingerprintHeadlessHelper extends FingerprintManager.Authentication
 
     private final Context mContext;
     private final FingerprintManager mFingerprintManager;
-//    private final ImageView mIcon;
-//    private final TextView mErrorTextView;
     private final Callback mCallback;
     private CancellationSignal mCancellationSignal;
     private int mAttempts = 0;
@@ -63,8 +59,8 @@ public class FingerprintHeadlessHelper extends FingerprintManager.Authentication
     }
 
     /**
-     * Constructor for {@link FingerprintUiHelper}. This method is expected to be called from
-     * only the {@link FingerprintUiHelperBuilder} class.
+     * Constructor for {@link FingerprintHeadlessHelper}. This method is expected to be called from
+     * only the {@link FingerprintHeadlessHelperBuilder} class.
      */
     protected FingerprintHeadlessHelper(Context context, FingerprintManager fingerprintManager,
             Callback callback) {
@@ -136,7 +132,7 @@ public class FingerprintHeadlessHelper extends FingerprintManager.Authentication
     protected void showError(CharSequence error) {
         this.mCallback.onError(error);
     }
-    
+
     public interface Callback {
 
         void onAuthenticated(FingerprintManager.AuthenticationResult result);

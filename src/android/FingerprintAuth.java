@@ -356,10 +356,20 @@ public class FingerprintAuth extends CordovaPlugin {
                                             mHeadless.handleCreateView();
                                             mHeadless.handleResume();
                                         } else {
-                                            Log.e(TAG, "Failed to init Cipher and backup disabled.");
-                                            mCallbackContext.error(PluginError.INIT_CIPHER_FAILED.name());
-                                            mPluginResult = new PluginResult(PluginResult.Status.ERROR);
-                                            mCallbackContext.sendPluginResult(mPluginResult);
+                                            if (!mDisableBackup) {
+                                                // This happens if the lock screen has been disabled or or a fingerprint got
+                                                // enrolled. Thus show the dialog to authenticate with their password
+                                                mHeadless.setCryptoObject(new FingerprintManager.CryptoObject(mCipher));
+                                                mHeadless.handleCreate();
+                                                mHeadless.setStage(FingerprintAuthenticationHeadless.Stage.NEW_FINGERPRINT_ENROLLED);
+                                                mHeadless.handleCreateView();
+                                                mHeadless.handleResume();
+                                            } else {
+                                                Log.e(TAG, "Failed to init Cipher and backup disabled.");
+                                                mCallbackContext.error(PluginError.INIT_CIPHER_FAILED.name());
+                                                mPluginResult = new PluginResult(PluginResult.Status.ERROR);
+                                                mCallbackContext.sendPluginResult(mPluginResult);
+                                            }
                                         }
                                     } else {
 

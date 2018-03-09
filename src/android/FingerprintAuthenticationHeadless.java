@@ -16,20 +16,15 @@
 
 package com.cordova.plugin.android.fingerprintauth;
 
-import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.hardware.fingerprint.FingerprintManager;
-import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
 /**
- * A dialog which uses fingerprint APIs to authenticate the user, and falls back to password
- * authentication if fingerprint is not available.
+ * Activates fingerprint-detection (without dialog) using fingerprint APIs to authenticate the user,
+ * and falls back to password authentication if fingerprint is not available.
  */
 public class FingerprintAuthenticationHeadless
         implements FingerprintHeadlessHelper.Callback {
@@ -42,28 +37,28 @@ public class FingerprintAuthenticationHeadless
     private FingerprintManager.CryptoObject mCryptoObject;
     private FingerprintHeadlessHelper mFingerprintHeadlessHelper;
     FingerprintHeadlessHelper.FingerprintHeadlessHelperBuilder mFingerprintHeadlessHelperBuilder;
-    
+
     private Context mContext;
     private boolean mListening = false;
 
     public FingerprintAuthenticationHeadless(Context context) {
-    	this.mContext = context;
+        this.mContext = context;
     }
 
-    public void handleCreate(){//Bundle savedInstanceState) {
+    public void handleCreate(){
 
         mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
         mFingerprintHeadlessHelperBuilder = new FingerprintHeadlessHelper.FingerprintHeadlessHelperBuilder(
-        		mContext, mContext.getSystemService(FingerprintManager.class));
+                mContext, mContext.getSystemService(FingerprintManager.class));
 
     }
 
     public void handleCreateView() {
-    	
+
         Log.d(TAG, "disableBackup: " + FingerprintAuth.mDisableBackup);
-        
+
         mFingerprintHeadlessHelper = mFingerprintHeadlessHelperBuilder.build(this);
-        
+
         updateStage();
 
         // If fingerprint authentication is not available, switch immediately to the backup
@@ -111,35 +106,35 @@ public class FingerprintAuthenticationHeadless
 //        int cancel_id = getResources()
 //                .getIdentifier("cancel", "string", FingerprintAuth.packageName);
         switch (mStage) {
-            case FINGERPRINT:
-//                mCancelButton.setText(cancel_id);
-//                int use_backup_id = getResources()
-//                        .getIdentifier("use_backup", "string", FingerprintAuth.packageName);
-//                mSecondDialogButton.setText(use_backup_id);
-//                mFingerprintContent.setVisibility(View.VISIBLE);
-                break;
-            case NEW_FINGERPRINT_ENROLLED:
-                // Intentional fall through
-            case BACKUP:
-                if (mStage == Stage.NEW_FINGERPRINT_ENROLLED) {
+        case FINGERPRINT:
+//            mCancelButton.setText(cancel_id);
+//            int use_backup_id = getResources()
+//                    .getIdentifier("use_backup", "string", FingerprintAuth.packageName);
+//            mSecondDialogButton.setText(use_backup_id);
+//            mFingerprintContent.setVisibility(View.VISIBLE);
+            break;
+        case NEW_FINGERPRINT_ENROLLED:
+            // Intentional fall through
+        case BACKUP:
+            if (mStage == Stage.NEW_FINGERPRINT_ENROLLED) {
 
-                }
-                if (!mKeyguardManager.isKeyguardSecure()) {
-                    // Show a message that the user hasn't set up a lock screen.
-                    int secure_lock_screen_required_id = mContext.getResources()
-                            .getIdentifier("secure_lock_screen_required", "string",
-                                    FingerprintAuth.packageName);
-                    Toast.makeText(mContext,
-                    		mContext.getString(secure_lock_screen_required_id),
-                            Toast.LENGTH_LONG).show();
-                    return;
-                }
-                if (FingerprintAuth.mDisableBackup) {
-                    FingerprintAuth.onError("backup disabled");
-                    return;
-                }
-                showAuthenticationScreen();
-                break;
+            }
+            if (!mKeyguardManager.isKeyguardSecure()) {
+                // Show a message that the user hasn't set up a lock screen.
+                int secure_lock_screen_required_id = mContext.getResources()
+                        .getIdentifier("secure_lock_screen_required", "string",
+                                FingerprintAuth.packageName);
+                Toast.makeText(mContext,
+                        mContext.getString(secure_lock_screen_required_id),
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
+            if (FingerprintAuth.mDisableBackup) {
+                FingerprintAuth.onError("backup disabled");
+                return;
+            }
+            showAuthenticationScreen();
+            break;
         }
     }
 
@@ -147,27 +142,11 @@ public class FingerprintAuthenticationHeadless
         this.handleResume();
     }
 
-//    public void handleActivityResult(int requestCode, int resultCode, Intent data) {
-//        if (requestCode == REQUEST_CODE_CONFIRM_DEVICE_CREDENTIALS) {
-//            // Challenge completed, proceed with using cipher
-//            if (resultCode == Activity.RESULT_OK) {
-//                FingerprintAuth.onAuthenticated(false /* used backup */, null);
-//            } else {
-//                // The user canceled or didn’t complete the lock screen
-//                // operation. Go to error/cancellation flow.
-//                FingerprintAuth.onCancelled();
-//            }
-////            dismissAllowingStateLoss();
-//            handleCompleted();
-//        }
-//    }
-
     @Override
     public void onAuthenticated(FingerprintManager.AuthenticationResult result) {
-        // Callback from FingerprintUiHelper. Let the activity know that authentication was
+        // Callback from FingerprintHeadlessHelper. Let the activity know that authentication was
         // successful.
         FingerprintAuth.onAuthenticated(true /* withFingerprint */, result);
-//        dismissAllowingStateLoss();
         handleCompleted();
     }
 
@@ -179,7 +158,6 @@ public class FingerprintAuthenticationHeadless
             }
         } else {
             FingerprintAuth.onError(errString);
-//            dismissAllowingStateLoss();
             handleCompleted();
         }
     }
@@ -188,13 +166,13 @@ public class FingerprintAuthenticationHeadless
         FingerprintAuth.onCancelled();
         handleCompleted();
     }
-    
+
     public boolean isActive(){
-    	return mListening;
+        return mListening;
     }
-    
+
     private void handleCompleted(){
-    	mFingerprintHeadlessHelper.stopListening();
+        mFingerprintHeadlessHelper.stopListening();
         FingerprintAuth.onHeadlessCompleted();
     }
 
