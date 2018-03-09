@@ -68,9 +68,18 @@ FingerprintAuth.prototype.isAvailable = function (successCallback, errorCallback
 };
 
 FingerprintAuth.prototype.cancel = function (successCallback, errorCallback) {
+    // NOTE handling this on Java side would require a major rewrite of
+    //      the implementation, so just convert this here:
+    var _errorCallback = errorCallback? function(error){
+        if(error === 'FINGERPRINT_CANCELLED'){
+            successCallback && successCallback({canceled: true});
+        } else {
+            errorCallback(error);
+        }
+    } : errorCallback;
     cordova.exec(
         successCallback,
-        errorCallback,
+        _errorCallback,
         "FingerprintAuth",  // Java Class
         "cancel", // action
         [{}]
