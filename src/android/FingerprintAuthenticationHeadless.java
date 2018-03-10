@@ -151,15 +151,20 @@ public class FingerprintAuthenticationHeadless
     }
 
     @Override
-    public void onError(CharSequence errString) {
+    public void onError(int code, CharSequence errString) {
         if (!FingerprintAuth.mDisableBackup) {
             if (mContext.getApplicationContext() != null && isActive()) {
                 goToBackup();
             }
         } else {
-            FingerprintAuth.onError(errString);
+            FingerprintAuth.onProblem(code, errString, true);
             handleCompleted();
         }
+    }
+
+    @Override
+    public void onProblem(int code, CharSequence errString) {
+        FingerprintAuth.onProblem(code, errString, false);
     }
 
     public void cancel() {

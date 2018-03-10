@@ -1,34 +1,5 @@
 package com.cordova.plugin.android.fingerprintauth;
 
-import org.apache.cordova.CordovaWebView;
-import org.apache.cordova.CallbackContext;
-import org.apache.cordova.CordovaPlugin;
-import org.apache.cordova.CordovaInterface;
-
-import android.Manifest;
-import android.annotation.TargetApi;
-import android.app.Activity;
-import android.app.FragmentTransaction;
-import android.app.KeyguardManager;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.hardware.fingerprint.FingerprintManager;
-import android.os.Bundle;
-import android.security.keystore.KeyGenParameterSpec;
-import android.security.keystore.KeyProperties;
-import android.util.Base64;
-import android.util.DisplayMetrics;
-import android.util.Log;
-
-import org.apache.cordova.PluginResult;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
@@ -48,6 +19,33 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
+
+import org.apache.cordova.CallbackContext;
+import org.apache.cordova.CordovaInterface;
+import org.apache.cordova.CordovaPlugin;
+import org.apache.cordova.CordovaWebView;
+import org.apache.cordova.PluginResult;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.Manifest;
+import android.annotation.TargetApi;
+import android.app.Activity;
+import android.app.FragmentTransaction;
+import android.app.KeyguardManager;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.hardware.fingerprint.FingerprintManager;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
+import android.util.Base64;
+import android.util.DisplayMetrics;
+import android.util.Log;
 
 @TargetApi(23)
 public class FingerprintAuth extends CordovaPlugin {
@@ -498,8 +496,35 @@ public class FingerprintAuth extends CordovaPlugin {
         try {
             resultJson.put("canceled", wasCanceled);
             mPluginResult = new PluginResult(PluginResult.Status.OK);
-            mCallbackContext.success(resultJson);
             mCallbackContext.sendPluginResult(mPluginResult);
+        } catch (JSONException e) {
+            Log.e(TAG, "Availability Result Error: JSONException: " + e.toString());
+            errorMessage = PluginError.JSON_EXCEPTION.name();
+        } catch (SecurityException e) {
+            Log.e(TAG, "Availability Result Error: SecurityException: " + e.toString());
+            errorMessage = PluginError.SECURITY_EXCEPTION.name();
+        }
+        if (null != errorMessage) {
+            Log.e(TAG, errorMessage);
+            setPluginResultError(errorMessage);
+        }
+    }
+    
+    private static void sendProblemMessage(int errorCode, CharSequence errString, boolean critical) {
+        String errorMessage = null;
+        JSONObject resultJson = new JSONObject();
+        try {
+            final String msg = errString != null && errString.length() > 0? errString.toString() : PluginError.FINGERPRINT_ERROR.name();
+            resultJson.put("problem", msg);
+            resultJson.put("error", critical);
+            resultJson.put("code", errorCode);
+            PluginResult result = new PluginResult(PluginResult.Status.OK, resultJson);
+            if(!critical) {
+              result.setKeepCallback(true);
+            } else {
+              mPluginResult = result;
+            }
+            mCallbackContext.sendPluginResult(result);
         } catch (JSONException e) {
             Log.e(TAG, "Availability Result Error: JSONException: " + e.toString());
             errorMessage = PluginError.JSON_EXCEPTION.name();
@@ -746,6 +771,11 @@ public class FingerprintAuth extends CordovaPlugin {
     public static void onError(CharSequence errString) {
         mCallbackContext.error(PluginError.FINGERPRINT_ERROR.name());
         Log.e(TAG, errString.toString());
+    }
+    
+    public static void onProblem(int errorCode, CharSequence errString, boolean critical) {
+        sendProblemMessage(errorCode, errString, critical);
+        Log.e(TAG, "Problem"+(critical? " [critical]" : "")+": " + errString.toString());
     }
 
     public static boolean setPluginResultError(String errorMessage) {

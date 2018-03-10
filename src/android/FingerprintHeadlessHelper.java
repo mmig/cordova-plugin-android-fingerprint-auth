@@ -21,6 +21,10 @@ import android.content.Context;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.CancellationSignal;
 
+import org.apache.cordova.PluginResult;
+
+import com.cordova.plugin.android.fingerprintauth.FingerprintAuth.PluginError;
+
 
 /**
  * Small helper class to manage text/icon around fingerprint authentication UI.
@@ -81,7 +85,7 @@ public class FingerprintHeadlessHelper extends FingerprintManager.Authentication
         mCancellationSignal = new CancellationSignal();
         mSelfCancelled = false;
         mFingerprintManager
-                .authenticate(cryptoObject, mCancellationSignal, 0 /* flags */, this, null);
+        .authenticate(cryptoObject, mCancellationSignal, 0 /* flags */, this, null);
     }
 
     public void stopListening() {
@@ -95,13 +99,13 @@ public class FingerprintHeadlessHelper extends FingerprintManager.Authentication
     @Override
     public void onAuthenticationError(int errMsgId, final CharSequence errString) {
         if (!mSelfCancelled) {
-            showError(errString);
+            showError(errMsgId, errString, true);
         }
     }
 
     @Override
     public void onAuthenticationHelp(int helpMsgId, CharSequence helpString) {
-        showError(helpString);
+        showError(helpMsgId, helpString, false);
     }
 
     @Override
@@ -116,10 +120,10 @@ public class FingerprintHeadlessHelper extends FingerprintManager.Authentication
         final String too_many_attempts_string = mContext.getResources().getString(
                 fingerprint_too_many_attempts_id);
         if (mAttempts > FingerprintAuth.mMaxAttempts) {
-            showError(too_many_attempts_string);
+            showError(FingerprintManager.FINGERPRINT_ERROR_LOCKOUT, too_many_attempts_string, true);
         } else {
-            showError(mContext.getResources().getString(
-                    fingerprint_not_recognized_id));
+            showError(-1, mContext.getResources().getString(
+                    fingerprint_not_recognized_id), false);
         }
     }
 
@@ -129,14 +133,22 @@ public class FingerprintHeadlessHelper extends FingerprintManager.Authentication
         mCallback.onAuthenticated(fingerprintResult);
     }
 
-    protected void showError(CharSequence error) {
-        this.mCallback.onError(error);
+    protected void showError(int error, CharSequence errorDescription, boolean isCritical) {
+
+        
+        if(isCritical){
+            this.mCallback.onError(error, errorDescription);
+        } else {
+            this.mCallback.onProblem(error, errorDescription);
+        }
     }
 
     public interface Callback {
 
         void onAuthenticated(FingerprintManager.AuthenticationResult result);
 
-        void onError(CharSequence errString);
+        void onError(int code, CharSequence errString);
+
+        void onProblem(int code, CharSequence errString);
     }
 }
