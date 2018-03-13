@@ -305,10 +305,11 @@ public class FingerprintAuth extends CordovaPlugin {
                 if (arg_object.has("dialogHint")) {
                     mDialogHint = arg_object.getString("dialogHint");
                 }
-
+                boolean headless = false;
                 if (arg_object.has("headless")) {
-                    mIsHeadless = arg_object.getBoolean("headless");
+                    headless = arg_object.getBoolean("headless");
                 }
+                mIsHeadless = headless;
 
                 // Set language
                 Resources res = cordova.getActivity().getResources();
